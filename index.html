@@ -277,6 +277,7 @@
                 <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
                     <img src="1.jpg" style="width: 110px; height: 110px; object-fit: cover; border-radius: 20px; border: 2px solid #ffeef2; box-shadow: 0 4px 10px rgba(0,0,0,0.05);" alt="初见" onerror="this.style.display='none'">
                     <img src="2.jpg" style="width: 110px; height: 110px; object-fit: cover; border-radius: 20px; border: 2px solid #ffeef2; box-shadow: 0 4px 10px rgba(0,0,0,0.05);" alt="生日" onerror="this.style.display='none'">
+                    <img src="goddess.jpg" style="width: 110px; height: 110px; object-fit: cover; border-radius: 20px; border: 2px solid #ffeef2; box-shadow: 0 4px 10px rgba(0,0,0,0.05);" alt="女神" onerror="this.style.display='none'">
                 </div>
                 <p style="margin-top: 12px; font-size: 0.85rem; color: #b9708a;">✨ 那些闪闪发光的瞬间 ✨</p>
             </div>
@@ -464,7 +465,6 @@
             const sendLinglingBtn = document.getElementById('sendLinglingBtn');
             const chatWindow = document.getElementById('linglingChatWindow');
 
-            // 【新增】：初始化记忆数组，将 AI 的“灵魂设定”永远放在记忆的第一行
             let linglingMemory = [
                 { 
                     role: 'system', 
@@ -476,22 +476,18 @@
                 const text = linglingInput.value.trim();
                 if (!text) return;
 
-                // 1. 在网页上显示主人的话
                 const userMsg = document.createElement('div');
                 userMsg.className = 'msg-bubble msg-user';
                 userMsg.innerHTML = `<strong>雪小姐：</strong>${text}`;
                 chatWindow.appendChild(userMsg);
                 chatWindow.scrollTop = chatWindow.scrollHeight;
 
-                // 2. 【核心】：将主人的话存入上下文记忆库
                 linglingMemory.push({ role: 'user', content: text });
 
-                // 为了防止聊得太多导致字数超限，稍微做个保护：保留系统设定，且只记住最近的 20 句话
                 if (linglingMemory.length > 21) {
                     linglingMemory = [linglingMemory[0], ...linglingMemory.slice(-20)];
                 }
 
-                // UI 状态处理
                 linglingInput.value = '';
                 linglingInput.disabled = true;
                 sendLinglingBtn.innerText = '玲玲响应中...';
@@ -507,7 +503,7 @@
                         },
                         body: JSON.stringify({
                             model: 'deepseek-chat',
-                            messages: linglingMemory, // 【关键修改】：每次把整个记忆库发给 API
+                            messages: linglingMemory, 
                             temperature: 0.7
                         })
                     });
@@ -517,13 +513,11 @@
                     if(data.choices && data.choices.length > 0) {
                         const reply = data.choices[0].message.content;
                         
-                        // 3. 将玲玲的回复展示在网页上
                         const botMsg = document.createElement('div');
                         botMsg.className = 'msg-bubble msg-bot';
                         botMsg.innerHTML = `<strong>玲玲 🐶：</strong>${reply}`;
                         chatWindow.appendChild(botMsg);
 
-                        // 4. 【核心】：将玲玲自己的回复也存入记忆库，形成完整的对话闭环
                         linglingMemory.push({ role: 'assistant', content: reply });
                         
                     } else {
@@ -535,7 +529,6 @@
                     botMsg.className = 'msg-bubble msg-bot';
                     botMsg.innerHTML = `<strong>系统 🛠️：</strong>呜呜...玲玲的信号好像被陨石挡住了，请稍后再呼叫一次吧！`;
                     chatWindow.appendChild(botMsg);
-                    // 如果发送失败，把刚才存进去的主人的话拿出来，避免记忆错乱
                     linglingMemory.pop(); 
                 }
 
