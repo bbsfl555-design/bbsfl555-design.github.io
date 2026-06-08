@@ -272,14 +272,19 @@
                 </ul>
             </div>
         </div>
+        
         <div class="message-board">
             <h3 style="color:#e6677b; margin-bottom: 10px;">💌 今日留言板</h3>
             <textarea rows="2" placeholder="给雪小姐留一句悄悄话… (她会看到哦)"></textarea>
             <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
                 <button id="fakeSendBtn">✨ 寄出心意 ✨</button>
             </div>
-            <p style="font-size: 0.7rem; margin-top: 6px; color:#cf9eb0;">* 这是模拟小功能，真正的留言可以保存到本地或你的日记本</p>
+            
+            <div id="messageList" style="margin-top: 15px; text-align: left; max-height: 250px; overflow-y: auto; padding-top: 10px; border-top: 1px dashed #ffc0d0;">
+                <p style="text-align: center; color: #dfabc0; font-size: 0.8rem;">正在连接星际信号...</p>
+            </div>
         </div>
+        
         <div class="quote">
             🌹 “你的每个瞬间，都是我宇宙里的恒星。” 🌹
         </div>
@@ -287,60 +292,41 @@
             💖 专属献给 李雪儿 · 永远更新的回忆星球 💖
         </footer>
     </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         (function() {
-            // 获取三个模块
+            // --- 1. 原有的页面动画逻辑 ---
             const welcome = document.getElementById('welcomeScreen');
             const heart = document.getElementById('heartScreen');
             const mainDiv = document.getElementById('mainContent');
-            // 动画时间轴（可自由调整）
-            const WELCOME_DURATION = 2800;    // 欢迎语展示2.8秒
-            const HEART_DURATION = 4000;       // 爱心滚动展示4秒
-            // 1. 欢迎阶段：先显示，然后渐隐
+            const WELCOME_DURATION = 2800;    
+            const HEART_DURATION = 4000;      
             setTimeout(() => {
                 if (welcome) {
                     welcome.style.opacity = '0';
-                    // 等待渐隐动画结束后隐藏欢迎层并展示爱心层
                     setTimeout(() => {
                         welcome.style.visibility = 'hidden';
                         welcome.style.display = 'none';
-                        // 显示爱心滚动屏幕
                         if (heart) {
                             heart.style.visibility = 'visible';
                             heart.style.opacity = '1';
                         }
-                    }, 1200); // 匹配 transition 1.2s
+                    }, 1200); 
                 }
             }, WELCOME_DURATION);
-            // 2. 爱心屏幕展示一段时间后，渐隐并展示主内容
             setTimeout(() => {
                 if (heart) {
                     heart.style.opacity = '0';
                     setTimeout(() => {
                         heart.style.visibility = 'hidden';
                         heart.style.display = 'none';
-                        // 主内容淡入
                         if (mainDiv) {
                             mainDiv.classList.add('show');
                         }
                     }, 1200);
                 }
             }, WELCOME_DURATION + HEART_DURATION);
-            // 额外小浪漫：点击假发送按钮给一个toast提醒(模拟心意)
-            const sendBtn = document.getElementById('fakeSendBtn');
-            if (sendBtn) {
-                sendBtn.addEventListener('click', () => {
-                    const textarea = document.querySelector('.message-board textarea');
-                    const msg = textarea ? textarea.value.trim() : '';
-                    if (msg) {
-                        alert(`💖 心意已传达到宇宙深处：“${msg}”\n—— 李雪儿会感受到的 ✨`);
-                        textarea.value = '';
-                    } else {
-                        alert('🌷 写下一点什么吧，哪怕一个表情也好～');
-                    }
-                });
-            }
-            // 预置一些动态效果：让主页面里的那些标签有点击小提示
             const imageCards = document.querySelectorAll('.card:first-child div div');
             imageCards.forEach(item => {
                 item.style.cursor = 'pointer';
@@ -348,6 +334,79 @@
                     alert('📷 这里以后可以放你们的合照！\n你可以右键审查元素，直接替换图片链接或文字。');
                 });
             });
+
+            // --- 2. 真实的云端留言板逻辑 ---
+            const SUPABASE_URL = 'https://zpldynjwjineoipqxkqd.supabase.co'; 
+            const SUPABASE_KEY = 'sb_publishable_6yN2c9IhgjY28ZmsTVPoYA_1SSYPB8g'; 
+            
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            const sendBtn = document.getElementById('fakeSendBtn');
+            const textarea = document.querySelector('.message-board textarea');
+            const messageList = document.getElementById('messageList');
+
+            // 拉取云端留言并渲染
+            async function fetchMessages() {
+                const { data, error } = await supabase
+                    .from('messages')
+                    .select('*')
+                    .order('created_at', { ascending: false }); 
+                if (error) {
+                    messageList.innerHTML = '<p style="text-align: center; color: #e6677b; font-size: 0.8rem;">获取留言失败，请检查数据库配置或表名 📡</p>';
+                    return;
+                }
+                if (data && data.length > 0) {
+                    messageList.innerHTML = ''; // 清空提示
+                    data.forEach(msg => {
+                        const date = new Date(msg.created_at);
+                        const timeString = `${date.getMonth() + 1}月${date.getDate()}日 ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+                        
+                        const msgDiv = document.createElement('div');
+                        msgDiv.style.marginBottom = '10px';
+                        msgDiv.style.padding = '10px';
+                        msgDiv.style.background = '#fff';
+                        msgDiv.style.borderRadius = '12px';
+                        msgDiv.style.fontSize = '0.85rem';
+                        msgDiv.style.color = '#b9708a';
+                        msgDiv.style.boxShadow = '0 2px 8px rgba(0,0,0,0.03)';
+                        
+                        msgDiv.innerHTML = `
+                            <div style="font-size: 0.7rem; color: #dfabc0; margin-bottom: 4px;">${timeString}</div>
+                            <div style="word-break: break-all; white-space: pre-wrap;">${msg.content}</div>
+                        `;
+                        messageList.appendChild(msgDiv);
+                    });
+                } else {
+                    messageList.innerHTML = '<p style="text-align: center; color: #dfabc0; font-size: 0.8rem;">这里还是空空的，快写下第一条留言吧 ✨</p>';
+                }
+            }
+
+            // 发送留言到云端
+            if (sendBtn) {
+                sendBtn.addEventListener('click', async () => {
+                    const content = textarea.value.trim();
+                    if (content) {
+                        sendBtn.innerText = "发送中...";
+                        sendBtn.style.pointerEvents = "none"; 
+                        const { error } = await supabase
+                            .from('messages')
+                            .insert([ { content: content } ]);
+                        if (!error) {
+                            textarea.value = ''; 
+                            fetchMessages();     
+                        } else {
+                            alert('发送失败了，请检查Supabase的RSL权限是否关闭~');
+                        }
+                        
+                        sendBtn.innerText = "✨ 寄出心意 ✨";
+                        sendBtn.style.pointerEvents = "auto";
+                    } else {
+                        alert('🌷 写下一点什么吧，哪怕一个表情也好～');
+                    }
+                });
+            }
+
+            // 页面启动时拉取数据
+            fetchMessages();
         })();
     </script>
 </body>
