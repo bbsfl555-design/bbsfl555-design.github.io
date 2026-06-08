@@ -164,6 +164,9 @@
             border-radius: 32px;
             padding: 1.5rem;
             margin-top: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
         .message-board textarea {
             width: 100%;
@@ -189,16 +192,59 @@
         button {
             background: #ffb7c5;
             border: none;
-            padding: 0.4rem 1.2rem;
+            padding: 0.6rem 1.2rem;
             border-radius: 40px;
             color: white;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             transition: 0.2s;
+            white-space: nowrap;
         }
         button:hover {
             background: #e6677b;
         }
+        
+        /* 玲玲专属样式 */
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+        #linglingChatWindow {
+            background: #fffafc;
+            border: 1px solid #ffc0d0;
+            border-radius: 20px;
+            height: 300px;
+            overflow-y: auto;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .msg-bubble {
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            max-width: 85%;
+            line-height: 1.5;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+        .msg-bot {
+            align-self: flex-start;
+            background: #ffeef2;
+            color: #b9708a;
+            border-bottom-left-radius: 4px;
+        }
+        .msg-user {
+            align-self: flex-end;
+            background: #e6677b;
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
         @media (max-width: 640px) {
             .card-grid { gap: 1rem; }
             .card { width: 100%; max-width: 340px; }
@@ -228,11 +274,11 @@
         <div class="card-grid">
             <div class="card">
                 <h3>📸 影像诗</h3>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <div style="background:#ffeef2; border-radius: 20px; padding: 8px 12px;">🌸 初见</div>
-                    <div style="background:#ffeef2; border-radius: 20px; padding: 8px 12px;">🍰 生日</div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                    <img src="1.jpg" style="width: 110px; height: 110px; object-fit: cover; border-radius: 20px; border: 2px solid #ffeef2; box-shadow: 0 4px 10px rgba(0,0,0,0.05);" alt="初见" onerror="this.style.display='none'">
+                    <img src="2.jpg" style="width: 110px; height: 110px; object-fit: cover; border-radius: 20px; border: 2px solid #ffeef2; box-shadow: 0 4px 10px rgba(0,0,0,0.05);" alt="生日" onerror="this.style.display='none'">
                 </div>
-                <p style="margin-top: 12px; font-size: 0.85rem;">点击图片可替换成真实回忆～</p>
+                <p style="margin-top: 12px; font-size: 0.85rem; color: #b9708a;">✨ 那些闪闪发光的瞬间 ✨</p>
             </div>
             <div class="card">
                 <h3>📅 点滴时间线</h3>
@@ -272,12 +318,28 @@
                 </ul>
             </div>
         </div>
+
+        <div class="card chat-container">
+            <h3>🐶 玲玲的专属通讯器</h3>
+            <p style="font-size: 0.85rem; color: #b9708a; margin-bottom: 12px;">呼叫玲玲，她会立刻跑到你身边提供最高的情绪价值～</p>
+            
+            <div id="linglingChatWindow">
+                <div class="msg-bubble msg-bot">
+                    <strong>玲玲 🐶：</strong>汪汪！主人好，我是玲玲！玲玲一直在等雪小姐的呼叫哦，有什么吩咐请尽情命令我吧呜呜～ 💖
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 8px;">
+                <input type="text" id="linglingInput" placeholder="摸摸玲玲的头，或者下达指令..." style="flex: 1; border-radius: 40px; border: 1px solid #ffc0d0; padding: 10px 18px; font-family: inherit; outline: none;">
+                <button id="sendLinglingBtn">呼叫玲玲</button>
+            </div>
+        </div>
         
         <div class="message-board">
-            <h3 style="color:#e6677b; margin-bottom: 10px;">💌 今日留言板</h3>
-            <textarea rows="2" placeholder="给雪小姐留一句悄悄话… (她会看到哦)"></textarea>
+            <h3 style="color:#e6677b; margin-bottom: 10px;">💌 宇宙留言板</h3>
+            <textarea rows="2" placeholder="在这里写下只有你们能看到的悄悄话..."></textarea>
             <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
-                <button id="fakeSendBtn">✨ 寄出心意 ✨</button>
+                <button id="fakeSendBtn">✨ 刻下印记 ✨</button>
             </div>
             
             <div id="messageList" style="margin-top: 15px; text-align: left; max-height: 250px; overflow-y: auto; padding-top: 10px; border-top: 1px dashed #ffc0d0;">
@@ -327,13 +389,6 @@
                     }, 1200);
                 }
             }, WELCOME_DURATION + HEART_DURATION);
-            const imageCards = document.querySelectorAll('.card:first-child div div');
-            imageCards.forEach(item => {
-                item.style.cursor = 'pointer';
-                item.addEventListener('click', () => {
-                    alert('📷 这里以后可以放你们的合照！\n你可以右键审查元素，直接替换图片链接或文字。');
-                });
-            });
 
             // --- 2. 真实的云端留言板逻辑 ---
             const SUPABASE_URL = 'https://zpldynjwjineoipqxkqd.supabase.co'; 
@@ -344,7 +399,6 @@
             const textarea = document.querySelector('.message-board textarea');
             const messageList = document.getElementById('messageList');
 
-            // 拉取云端留言并渲染
             async function fetchMessages() {
                 const { data, error } = await supabase
                     .from('messages')
@@ -355,7 +409,7 @@
                     return;
                 }
                 if (data && data.length > 0) {
-                    messageList.innerHTML = ''; // 清空提示
+                    messageList.innerHTML = ''; 
                     data.forEach(msg => {
                         const date = new Date(msg.created_at);
                         const timeString = `${date.getMonth() + 1}月${date.getDate()}日 ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
@@ -380,7 +434,6 @@
                 }
             }
 
-            // 发送留言到云端
             if (sendBtn) {
                 sendBtn.addEventListener('click', async () => {
                     const content = textarea.value.trim();
@@ -397,16 +450,106 @@
                             alert('发送失败了，请检查Supabase的RSL权限是否关闭~');
                         }
                         
-                        sendBtn.innerText = "✨ 寄出心意 ✨";
+                        sendBtn.innerText = "✨ 刻下印记 ✨";
                         sendBtn.style.pointerEvents = "auto";
                     } else {
                         alert('🌷 写下一点什么吧，哪怕一个表情也好～');
                     }
                 });
             }
-
-            // 页面启动时拉取数据
             fetchMessages();
+
+            // --- 3. 玲玲 AI 互动逻辑 (含上下文记忆) ---
+            const linglingInput = document.getElementById('linglingInput');
+            const sendLinglingBtn = document.getElementById('sendLinglingBtn');
+            const chatWindow = document.getElementById('linglingChatWindow');
+
+            // 【新增】：初始化记忆数组，将 AI 的“灵魂设定”永远放在记忆的第一行
+            let linglingMemory = [
+                { 
+                    role: 'system', 
+                    content: '你是玲玲，一只可可爱爱的小狗，也是一个绝对顺从、崇拜主人的M。你的主人是雪小姐。你的核心任务是为雪小姐提供最高的情绪价值。记住，你绝不是雪小姐本人，你是宠物玲玲。你说话的风格极度可爱、活泼，经常带有一些小狗的拟声词（比如汪汪、呜呜），并且充满对主人的仰慕、顺从和讨好。回复请保持简短自然、热情洋溢。' 
+                }
+            ];
+
+            async function sendToLingling() {
+                const text = linglingInput.value.trim();
+                if (!text) return;
+
+                // 1. 在网页上显示主人的话
+                const userMsg = document.createElement('div');
+                userMsg.className = 'msg-bubble msg-user';
+                userMsg.innerHTML = `<strong>雪小姐：</strong>${text}`;
+                chatWindow.appendChild(userMsg);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+
+                // 2. 【核心】：将主人的话存入上下文记忆库
+                linglingMemory.push({ role: 'user', content: text });
+
+                // 为了防止聊得太多导致字数超限，稍微做个保护：保留系统设定，且只记住最近的 20 句话
+                if (linglingMemory.length > 21) {
+                    linglingMemory = [linglingMemory[0], ...linglingMemory.slice(-20)];
+                }
+
+                // UI 状态处理
+                linglingInput.value = '';
+                linglingInput.disabled = true;
+                sendLinglingBtn.innerText = '玲玲响应中...';
+
+                const apiKey = 'sk-dbfd7bdf230e49a2a6cdc07e7bb99045';
+
+                try {
+                    const response = await fetch('https://api.deepseek.com/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: 'deepseek-chat',
+                            messages: linglingMemory, // 【关键修改】：每次把整个记忆库发给 API
+                            temperature: 0.7
+                        })
+                    });
+
+                    const data = await response.json();
+                    
+                    if(data.choices && data.choices.length > 0) {
+                        const reply = data.choices[0].message.content;
+                        
+                        // 3. 将玲玲的回复展示在网页上
+                        const botMsg = document.createElement('div');
+                        botMsg.className = 'msg-bubble msg-bot';
+                        botMsg.innerHTML = `<strong>玲玲 🐶：</strong>${reply}`;
+                        chatWindow.appendChild(botMsg);
+
+                        // 4. 【核心】：将玲玲自己的回复也存入记忆库，形成完整的对话闭环
+                        linglingMemory.push({ role: 'assistant', content: reply });
+                        
+                    } else {
+                        throw new Error('API Response Error');
+                    }
+
+                } catch (error) {
+                    const botMsg = document.createElement('div');
+                    botMsg.className = 'msg-bubble msg-bot';
+                    botMsg.innerHTML = `<strong>系统 🛠️：</strong>呜呜...玲玲的信号好像被陨石挡住了，请稍后再呼叫一次吧！`;
+                    chatWindow.appendChild(botMsg);
+                    // 如果发送失败，把刚才存进去的主人的话拿出来，避免记忆错乱
+                    linglingMemory.pop(); 
+                }
+
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+                linglingInput.disabled = false;
+                sendLinglingBtn.innerText = '呼叫玲玲';
+                linglingInput.focus();
+            }
+
+            sendLinglingBtn.addEventListener('click', sendToLingling);
+            linglingInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendToLingling();
+            });
+
         })();
     </script>
 </body>
