@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>雪小姐的专属星系 ✨</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', 'Poppins', 'Microsoft YaHei', sans-serif;
+            overflow-x: hidden;
+            background: #fff0f5;  /* 淡粉色底色，防止闪现 */
+        }
+        /* 全屏覆盖层公共样式 */
+        .screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 10;
+            transition: opacity 1.2s ease-in-out;
+            opacity: 1;
+            pointer-events: none;  /* 让所有覆盖层不干扰点击（主页面出来后可以点击） */
+        }
+        /* 欢迎屏幕 */
+        .welcome-screen {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            flex-direction: column;
+            z-index: 30;
+        }
+        .welcome-text {
+            font-size: clamp(1.8rem, 8vw, 3.5rem);
+            font-weight: 600;
+            background: linear-gradient(120deg, #fff, #ffe6f0, #ffb6c1);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            animation: gentleGlow 1.8s infinite alternate;
+            letter-spacing: 2px;
+            padding: 1rem;
+        }
+        @keyframes gentleGlow {
+            0% { text-shadow: 0 0 5px rgba(255,215,225,0.7); filter: brightness(1);}
+            100% { text-shadow: 0 0 25px rgba(255,180,200,0.9); filter: brightness(1.05);}
+        }
+        /* 爱心滚动屏幕 */
+        .heart-screen {
+            background: #ffeef4;
+            z-index: 20;
+            flex-direction: column;
+            backdrop-filter: blur(2px);
+        }
+        .rolling-heart-container {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+            padding: 20px 0;
+        }
+        .rolling-track {
+            display: inline-block;
+            animation: scrollHeart 12s linear infinite;
+            font-size: 4rem;
+            letter-spacing: 20px;
+        }
+        .rolling-track span {
+            display: inline-block;
+            margin: 0 15px;
+            animation: heartBeat 0.8s ease-in-out infinite;
+            transform-origin: center;
+        }
+        @keyframes scrollHeart {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1);}
+            50% { transform: scale(1.2);}
+        }
+        .heart-sub {
+            margin-top: 2rem;
+            font-size: 1.2rem;
+            color: #c94f6f;
+            font-weight: 300;
+            letter-spacing: 4px;
+            opacity: 0.8;
+        }
+        /* 主页面 (最终内容) */
+        .main-content {
+            position: relative;
+            background: #fff9fc;
+            min-height: 100vh;
+            padding: 2rem 1.5rem 4rem;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 1.2s ease;
+        }
+        .main-content.show {
+            opacity: 1;
+        }
+        /* 主页面漂亮样式 */
+        .hero {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .hero h1 {
+            font-size: 2.4rem;
+            background: linear-gradient(135deg, #e6677b, #f29b9b);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        .hero p {
+            color: #b9708a;
+            font-style: italic;
+        }
+        .card-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.8rem;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        .card {
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            width: 280px;
+            transition: transform 0.2s;
+            border: 1px solid #ffdfe8;
+        }
+        .card:hover {
+            transform: translateY(-6px);
+        }
+        .card h3 {
+            color: #e6677b;
+            border-left: 4px solid #f5a3b0;
+            padding-left: 12px;
+            margin-bottom: 1rem;
+        }
+        .timeline-item {
+            margin-bottom: 1.2rem;
+            border-bottom: 1px dashed #ffe0e7;
+            padding-bottom: 0.8rem;
+        }
+        .timeline-date {
+            font-weight: 600;
+            color: #e6677b;
+        }
+        .message-board {
+            background: #fff2f5;
+            border-radius: 32px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        .message-board textarea {
+            width: 100%;
+            border-radius: 48px;
+            border: 1px solid #ffc0d0;
+            padding: 12px 20px;
+            font-family: inherit;
+            resize: vertical;
+            background: #fffafc;
+        }
+        .quote {
+            text-align: center;
+            margin-top: 2.5rem;
+            color: #e28aa2;
+            font-size: 0.9rem;
+        }
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.75rem;
+            color: #dfabc0;
+        }
+        button {
+            background: #ffb7c5;
+            border: none;
+            padding: 0.4rem 1.2rem;
+            border-radius: 40px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #e6677b;
+        }
+        @media (max-width: 640px) {
+            .card-grid { gap: 1rem; }
+            .card { width: 100%; max-width: 340px; }
+            .rolling-track { font-size: 2.5rem; letter-spacing: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="screen welcome-screen" id="welcomeScreen">
+        <div class="welcome-text">欢迎雪小姐<br>这是专属于你的点滴</div>
+    </div>
+    <div class="screen heart-screen" id="heartScreen" style="opacity: 0; visibility: hidden;">
+        <div class="rolling-heart-container">
+            <div class="rolling-track">
+                <span>❤️</span><span>💖</span><span>💗</span><span>❤️</span><span>💓</span><span>💕</span>
+                <span>❤️</span><span>💖</span><span>💗</span><span>❤️</span><span>💓</span><span>💕</span>
+                <span>❤️</span><span>💖</span><span>💗</span><span>❤️</span><span>💓</span><span>💕</span>
+            </div>
+        </div>
+        <div class="heart-sub">✨ 心跳加载中 ✨</div>
+    </div>
+    <div class="main-content" id="mainContent">
+        <div class="hero">
+            <h1>📖 雪小姐的时光集</h1>
+            <p>每一刻都值得珍藏 · 只为你记录</p>
+        </div>
+        <div class="card-grid">
+            <div class="card">
+                <h3>📸 影像诗</h3>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <div style="background:#ffeef2; border-radius: 20px; padding: 8px 12px;">🌸 初见</div>
+                    <div style="background:#ffeef2; border-radius: 20px; padding: 8px 12px;">🍰 生日</div>
+                    <div style="background:#ffeef2; border-radius: 20px; padding: 8px 12px;">🌙 散步</div>
+                </div>
+                <p style="margin-top: 12px; font-size: 0.85rem;">点击图片可替换成真实回忆～</p>
+            </div>
+            <div class="card">
+                <h3>📅 点滴时间线</h3>
+                <div class="timeline-item">
+                    <div class="timeline-date">2025.03.08</div>
+                    <div>一起看了第一场日落 ❤️</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">2025.05.20</div>
+                    <div>偷偷写了三行情书 ✉️</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">今天</div>
+                    <div>为你建了这个专属星球 🌍</div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>✨ 雪小姐的小心愿</h3>
+                <ul style="margin-left: 1.2rem; color:#b9708a;">
+                    <li>去看极光</li>
+                    <li>吃遍所有甜品店</li>
+                    <li>一起养一只猫咪</li>
+                </ul>
+            </div>
+        </div>
+        <div class="message-board">
+            <h3 style="color:#e6677b; margin-bottom: 10px;">💌 今日留言板</h3>
+            <textarea rows="2" placeholder="给雪小姐留一句悄悄话… (她会看到哦)"></textarea>
+            <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+                <button id="fakeSendBtn">✨ 寄出心意 ✨</button>
+            </div>
+            <p style="font-size: 0.7rem; margin-top: 6px; color:#cf9eb0;">* 这是模拟小功能，真正的留言可以保存到本地或你的日记本</p>
+        </div>
+        <div class="quote">
+            🌹 “你的每个瞬间，都是我宇宙里的恒星。” 🌹
+        </div>
+        <footer>
+            💖 专属献给 李雪儿 · 永远更新的回忆星球 💖
+        </footer>
+    </div>
+    <script>
+        (function() {
+            // 获取三个模块
+            const welcome = document.getElementById('welcomeScreen');
+            const heart = document.getElementById('heartScreen');
+            const mainDiv = document.getElementById('mainContent');
+            // 动画时间轴（可自由调整）
+            const WELCOME_DURATION = 2800;    // 欢迎语展示2.8秒
+            const HEART_DURATION = 4000;       // 爱心滚动展示4秒
+            // 1. 欢迎阶段：先显示，然后渐隐
+            setTimeout(() => {
+                if (welcome) {
+                    welcome.style.opacity = '0';
+                    // 等待渐隐动画结束后隐藏欢迎层并展示爱心层
+                    setTimeout(() => {
+                        welcome.style.visibility = 'hidden';
+                        welcome.style.display = 'none';
+                        // 显示爱心滚动屏幕
+                        if (heart) {
+                            heart.style.visibility = 'visible';
+                            heart.style.opacity = '1';
+                        }
+                    }, 1200); // 匹配 transition 1.2s
+                }
+            }, WELCOME_DURATION);
+            // 2. 爱心屏幕展示一段时间后，渐隐并展示主内容
+            setTimeout(() => {
+                if (heart) {
+                    heart.style.opacity = '0';
+                    setTimeout(() => {
+                        heart.style.visibility = 'hidden';
+                        heart.style.display = 'none';
+                        // 主内容淡入
+                        if (mainDiv) {
+                            mainDiv.classList.add('show');
+                        }
+                    }, 1200);
+                }
+            }, WELCOME_DURATION + HEART_DURATION);
+            // 额外小浪漫：点击假发送按钮给一个toast提醒(模拟心意)
+            const sendBtn = document.getElementById('fakeSendBtn');
+            if (sendBtn) {
+                sendBtn.addEventListener('click', () => {
+                    const textarea = document.querySelector('.message-board textarea');
+                    const msg = textarea ? textarea.value.trim() : '';
+                    if (msg) {
+                        alert(`💖 心意已传达到宇宙深处：“${msg}”\n—— 李雪儿会感受到的 ✨`);
+                        textarea.value = '';
+                    } else {
+                        alert('🌷 写下一点什么吧，哪怕一个表情也好～');
+                    }
+                });
+            }
+            // 预置一些动态效果：让主页面里的那些标签有点击小提示
+            const imageCards = document.querySelectorAll('.card:first-child div div');
+            imageCards.forEach(item => {
+                item.style.cursor = 'pointer';
+                item.addEventListener('click', () => {
+                    alert('📷 这里以后可以放你们的合照！\n你可以右键审查元素，直接替换图片链接或文字。');
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
